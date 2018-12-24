@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="centered">
+        <h1>Build A Blog</h1>
+    </div>
+    {% if posts|length == 0 %}
+    <p>No Posts Yet</p>
+    {% else %}
+        {% for post in posts %}
+        <section>
+            <h2>{{post.title}}</h2>
+            <p>{{post.body}}</p>
+        </section>
+        <hr>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block footer %}
+    <p>&copy; 2018 SungHyun Park</p>
+{% endblock %}

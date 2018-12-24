@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% block head %}
+    <title>{{title}}</title>
+        <style>
+            .centered {
+                margin: 0 auto;
+                text-align: left;
+                width: 800px;
+            }
+            .error {
+                color:red;
+                font-style: italic;
+            }
+        </style>
+    {% endblock %}
+</head>
+<body>
+    <div>
+        <a href='/blog'>Main Blog Page</a>
+        <a href='/new-post'>Add a Blog Entry</a>
+    </div>
+    <div>
+        {% block content %}{% endblock %}
+    </div>
+</body>
+<footer>
+    {% block footer %}{% endblock %}
+</footer>
+</html>
