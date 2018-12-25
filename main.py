@@ -57,7 +57,7 @@ def index():
             title_page = post.title
         return render_template('blog.html', title=title_page, posts=posts, title_page=title_page, post_num=post_num)
     else:
-        posts = Blog.query.order_by(Blog.id).all()
+        posts = Blog.query.order_by(Blog.id.desc()).all()
     return render_template('blog.html', title='Build A Blog', posts=posts, title_page="Build A Blog", post_num=post_num)
 
 @app.route('/new-post', methods=['POST', 'GET'])

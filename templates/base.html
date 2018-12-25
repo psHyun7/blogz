@@ -1,22 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    {% block head %}
+    <link rel="stylesheet" type="text/css" href="/static/styles/style.css">
     <title>{{title}}</title>
-        <style>
-            .centered {
-                margin: 0 auto;
-                text-align: left;
-                width: 800px;
-            }
-            .error {
-                color:red;
-                font-style: italic;
-            }
-        </style>
-    {% endblock %}
 </head>
 <body>
+    <main>
     <div>
         <a href='/blog'>Main Blog Page</a>
         <a href='/new-post'>Add a Blog Entry</a>
@@ -24,6 +13,7 @@
     <div>
         {% block content %}{% endblock %}
     </div>
+    </main>
 </body>
 <footer>
     {% block footer %}{% endblock %}
