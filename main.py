@@ -45,9 +45,20 @@ def index():
         new_post = Blog(title, body)
         db.session.add(new_post)
         db.session.commit()
-    #Show All Posts
-    posts = Blog.query.order_by(Blog.id).all()
-    return render_template('blog.html', title='Build A Blog', posts=posts)
+        new_post = Blog.query.order_by(Blog.id.desc()).first()
+        new_id = new_post.id
+        new_url = "/blog?id=" + str(new_id)
+        return redirect(new_url)
+    #Check for Post # or Show all post.
+    post_num = request.args.get("id")
+    if post_num:
+        posts = Blog.query.filter_by(id=post_num).all()
+        for post in posts:
+            title_page = post.title
+        return render_template('blog.html', title=title_page, posts=posts, title_page=title_page, post_num=post_num)
+    else:
+        posts = Blog.query.order_by(Blog.id).all()
+    return render_template('blog.html', title='Build A Blog', posts=posts, title_page="Build A Blog", post_num=post_num)
 
 @app.route('/new-post', methods=['POST', 'GET'])
 def add_post():
