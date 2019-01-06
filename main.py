@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash
+from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 import hashlib, random, string
 
@@ -62,11 +62,11 @@ def require_login():
 
 #Automatically Redirect to /blog
 @app.route('/')
-def main_redirect():
-    return redirect('/blog')
+def main_page():
+    return render_template('index.html')
 
 @app.route('/blog', methods=['POST', 'GET'])
-def index():
+def blog():
     #Check for Blank Title or Body
     if request.method == 'POST':
         error = False
@@ -115,12 +115,11 @@ def signup():
     #any field is blank / invalid = return to /signup with error message/s
     #username already exists = return to /signup with error message (user already exists)
     #password + verify password
-    return None
+    return render_template('signup.html')
 
 
-
-@app.route('/login')
-def signup():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     #correct login = redirect to /new-post
     if request.method == 'POST':
         email = request.form['email']
@@ -133,7 +132,8 @@ def signup():
     #incorrect password = return to /login with error message (incorrect password)
     #username not in database = return to /login with error message (username does not exist)
     #user clicks register = redirect to /signup
-    return None
+    flash("error")
+    return render_template('login.html')
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -142,7 +142,7 @@ def logout():
 
 @app.route('/index')
 def index():
-    return None
+    return render_template('index.html')
 
 
 if __name__=='__main__':
