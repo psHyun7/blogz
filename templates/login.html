@@ -1,5 +1,32 @@
 {% extends "base.html" %}
 
+{% block head %}
+<title>Sign Up</title>
+<style>
+form {
+    background-color:#eee;
+    padding: 20px;
+    width: 200px;
+    height: auto;
+    border-radius: 10px;}
+label {    display: table-cell;}
+input {    display: table-cell;}
+.error {    color:red;}
+</style>
+{% endblock head %}
+
+
 {% block content %}
-<h1>login.html</h1>
-{% endblock %}
+
+<h1>Sign Up</h1>
+<form action="/login" method="POST">
+    <label for="user-name_id">Username:</label>
+    <input id="user-name_id" type="text" name="username_name" value="{{username_value}}" />
+    <p class="error">{{username_error}}</p>
+    <label for="password_id">Password:</label>
+    <input id="password_id" type="password" name="password_name" value=""/>
+    <p class="error">{{password_error}}</p>
+    <input type="submit" value="Submit" />
+</form>
+
+{% endblock content %}

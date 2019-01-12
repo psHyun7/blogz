@@ -1,56 +1,8 @@
-from flask import Flask, request, redirect, render_template, session, flash
-from flask_sqlalchemy import SQLAlchemy
-import hashlib, random, string
-
-
-#Setup
-app = Flask(__name__)
-app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:MyPassword@localhost:3306/blogz'
-app.config['SQLALCHEMY_ECHO'] = True
-db = SQLAlchemy(app)
-app.secret_key = 'B6*c12eNojsv#PG5'
-
-
-#Create Classes
-class Blog(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(120))
-    body = db.Column(db.Text)
-    owner = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    def __init__(self, title, body, owner):
-        self.title = title
-        self.body = body
-        self.owner = owner
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20))
-    pw_hash = db.Column(db.String(30))
-    posts = db.relationship('Blog', backref='owner')
-
-    def __init__(self, username, password):
-        self.username = username
-        self.pw_hash = make_pw_hash(password)
-
-
-#Functions
-def make_pw_hash(password, salt=None):
-    if not salt:
-        salt = make_salt
-    hash = hashlib.sha256(str.encode(password + salt)).hexdigest()
-    return '{0},{1}'.format(hash,salt)
-
-def make_salt():
-    return ''.join([random.choice(string.ascii_letters) for x in range(5)])
-
-def check_pw_hash(password, hash):
-    sale = hash.split(',')[1]
-    if make_pw_hash(password, salt) == hash:
-        return True
-    return False
+from flask import request, redirect, render_template, session, flash
+from app import app, db
+from models import Blog, User
+from hashutils import check_pw_hash
+import cgi
 
 
 #Routes
