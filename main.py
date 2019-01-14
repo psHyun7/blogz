@@ -5,20 +5,22 @@ from hashutils import check_pw_hash
 import cgi
 
 
-#Routes
+#Allowed Routes with Auto Redirect
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'register', 'static']
-    if request.endpoint not in allowed_routes and 'email' not in session:
+    allowed_routes = ['login', 'signup', 'list_blogs', 'index']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        flash("You must first Log In", "main_flash")
         return redirect('/login')
 
 #Automatically Redirect to /blog
 @app.route('/')
-def main_page():
-    return render_template('index.html')
+def index():
+    userlist = User.query.order_by(User.username).all()
+    return render_template('index.html', users=userlist)
 
 @app.route('/blog', methods=['POST', 'GET'])
-def blog():
+def list_blogs():
     #Check for Blank Title or Body
     if request.method == 'POST':
         error = False
@@ -33,24 +35,30 @@ def blog():
         if error:
             #redirect using POST method to preserve title or body
             return redirect ('/new-post', code=307)
-        #Create new entry to database
-        new_post = Blog(title, body)
+        #Create new entry to database with user id
+        owner = User.query.filter_by(username=session['username']).first()
+        new_post = Blog(title, body, owner)
         db.session.add(new_post)
         db.session.commit()
-        new_post = Blog.query.order_by(Blog.id.desc()).first()
-        new_id = new_post.id
-        new_url = "/blog?id=" + str(new_id)
+        new_url = "/blog?id=" + str(new_post.id)
         return redirect(new_url)
     #Check for Post # or Show all post.
     post_num = request.args.get("id")
+    user = request.args.get("user")
     if post_num:
-        posts = Blog.query.filter_by(id=post_num).all()
-        for post in posts:
-            title_page = post.title
-        return render_template('blog.html', title=title_page, posts=posts, title_page=title_page, post_num=post_num)
+        post = Blog.query.get(post_num)
+        title_page = post.title
+        return render_template('blog.html', title=title_page, post=post, title_page=title_page, post_num=post_num)
+    elif user:
+        owner = User.query.filter_by(id=user).first()
+        posts = Blog.query.filter_by(owner=owner).order_by(Blog.id.desc()).all()
+        title_page = "All Posts by " + owner.username
     else:
         posts = Blog.query.order_by(Blog.id.desc()).all()
-    return render_template('blog.html', title='Build A Blog', posts=posts, title_page="Build A Blog", post_num=post_num)
+        title_page = "All Posts"
+        page = request.args.get('page', 1, type=int)
+
+    return render_template('blog.html', title='Blogz', posts=posts, title_page=title_page, post_num=post_num)
 
 @app.route('/new-post', methods=['POST', 'GET'])
 def add_post():
@@ -61,41 +69,102 @@ def add_post():
     else:
         return render_template('new-post.html', title="Add Blog Entry")
 
-@app.route('/signup')
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    #correct signup = redirect to /new-post with new username stored in session
-    #any field is blank / invalid = return to /signup with error message/s
-    #username already exists = return to /signup with error message (user already exists)
-    #password + verify password
-    return render_template('signup.html')
+    no_spec_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    
+    if request.method == 'GET':
+        return render_template('signup.html')
+
+    if request.method == 'POST':
+
+        #Set Variables
+        username = request.form['username_name']
+        password = request.form['password_name']
+        v_password = request.form['v_password_name']
+        username_error = False
+        password_error = False
+        v_password_error = False
+
+        #Error Messages and Conditions
+        if username:
+            for char in username:
+                if char not in no_spec_char:
+                    username_error = True
+                    flash("Not Valid: Use Only Alphabet and Numbers.", "username_error")
+            if len(username) < 3 or len(username) > 20:
+                username_error = True
+                flash("Username must be between 3-20 characters.", "username_error")
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user:
+                username_error = True
+                flash("Username is already in use", "username_error")
+        else:
+            username_error = True
+            flash("Username field is Blank.", "username_error")
+
+        if not password:
+            password_error = True
+            flash("Password field is Blank.", "password_error")
+            if len(password) > 16:
+                password_error = True
+                flash("Not Valid: Password between the length of 1-16.", "password_error")
+            elif " " in password:
+                password_error = True
+                flash("Not Valid: Do not use space in Password.", "password_error")
+        
+        if not v_password:
+            v_password_error = True
+            flash("Verify Password field is Blank", "v_password_error")    
+            if " " in v_password:
+                v_password_error = True
+                flash("Not Valid: Do not use space in Password.", "v_password_error")
+        
+        if password and v_password and v_password != password:
+            v_password_error = True
+            flash("The Passwords do not match.", "v_password_error")
+
+        #Successful Entry with No Error    
+        if not username_error and not password_error and not v_password_error:
+            new_user = User(username, password)
+            db.session.add(new_user)
+            db.session.commit()
+            session['username'] = username
+            return redirect('/new-post')
+
+    return render_template('signup.html', username_value=username)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    #correct login = redirect to /new-post
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        user = User.query.filter_by(email=email).first()
-        if user and check_pw_hash(password, user.pw_hash):
-            session['email'] = email
-            flash("Logged in")
-            return redirect('/')
-    #incorrect password = return to /login with error message (incorrect password)
-    #username not in database = return to /login with error message (username does not exist)
-    #user clicks register = redirect to /signup
-    flash("error")
+        username = request.form["username_name"]
+        password = request.form["password_name"]
+        if username and not password:
+            flash("Password field is blank", "password_error")
+        elif username and password:
+            user = User.query.filter_by(username=username).first()
+            if user and check_pw_hash(password, user.pw_hash):
+                session['username'] = username
+                flash("Logged in", "main_flash")
+                return redirect('/new-post')
+            elif user:
+                flash("Password is incorrect", "password_error")
+            else:
+                flash("Username does not exist", "username_error")
+        elif not username:
+            flash("Username field is blank", "username_error")
+            if not password:
+                flash("Password field is blank", "password_error")
+
+        return render_template('login.html', username_value=username)
     return render_template('login.html')
 
-@app.route('/logout', methods=['POST'])
+@app.route('/logout')
 def logout():
-    #delete user from session
+    del session['username']
+    flash("Logged Out", "main_flash")
     return redirect('/blog')
-
-@app.route('/index')
-def index():
-    return render_template('index.html')
-
 
 if __name__=='__main__':
     app.run()

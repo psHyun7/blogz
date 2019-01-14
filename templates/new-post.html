@@ -15,7 +15,7 @@
         <div>
             {% with messages = get_flashed_messages(category_filter=["title_error"]) %}
             {% if messages %}
-            <ul class="error">
+            <ul class="text-danger">
             {% for message in messages %}
             {{ message }}
             {% endfor %}{% endif %}{% endwith %}
@@ -24,7 +24,7 @@
     </section>
     <section>
         <div>
-            <label for="body">Your new blog:</label>
+            <label for="body">Your new blog entry:</label>
         </div>
         <div>
             <textarea id="body" name="post_body">{{body_value}}</textarea>
@@ -32,7 +32,7 @@
         <div>
             {% with messages = get_flashed_messages(category_filter=["body_error"]) %}
             {% if messages %}
-            <ul class="error">
+            <ul class="text-danger">
             {% for message in messages %}
             {{ message }}
             {% endfor %}{% endif %}{% endwith %}

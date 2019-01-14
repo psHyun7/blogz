@@ -1,28 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <title>{{title}}</title>
 </head>
-<body>
-    <nav>
-        <ul id="user-account">
-            <li><a href="/login">Login</a></li>
-            <li><a href="/logout">Logout</a></li>
-        </ul>   
-        <ul id="navigation">
-            <li><a href="/">Home</a></li>
-            <li><a href="/blog">All Posts</a></li>
-            <li><a href="/new-post">New Post</a></li>
-        </ul> 
-    </nav>
-    <main>
+<body> 
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/">Home</a>
+                </div>
+                <ul class="nav navbar-nav">
+                    <li><a href="/blog">All Posts</a></li>
+                    <li><a href="/new-post">New Post</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if not session['username'] %}
+                    <li><a href="/login">Login</a></li>
+                    {% endif %}
+                    {% if session['username'] %}
+                    <li><a href="/logout">Logout</a></li>
+                    {% else %}
+                    <li><a href="/signup">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div> 
+        </nav>
+    <div class="container">
+    <div class="row">
+    {% with messages = get_flashed_messages(category_filter=["main_flash"]) %}
+    {% if messages %}
+    {% for message in messages %}
+    <h2 class="text-info">{{message}}</h2>
+    {% endfor %}{% endif %}{% endwith %}
+    </div>
+    <div class="row">
         {% block content %}{% endblock %}
-    </main>
+    </div>
 </body>
-<footer>
+<footer class="container text-center">
     {% block footer %}
-        <p>&copy; 2018 SungHyun Park</p>
+        <p>&copy; 2019 SungHyun Park</p>
     {% endblock %}
 </footer>
+</div>
+</div>
 </html>

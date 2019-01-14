@@ -5,21 +5,21 @@
         <h1>{{title_page}}</h1>
     </div>
     {% if post_num %}
-        {% for post in posts %}
-        <section>
+        <blockquote>
             <p>{{post.body}}</p>
-        </section>
+            <footer>written by <a href="/blog?user={{post.owner_id}}">{{post.owner.username}}</a></footer>
+        </blockquote>
         <hr>
-        {% endfor %}
     {% else %}
     {% if posts|length == 0 %}
     <p>No Posts Yet</p>
     {% else %}
         {% for post in posts %}
-        <section>
+        <blockquote>
             <a href="/blog?id={{post.id}}">{{post.title}}</a>
             <p>{{post.body}}</p>
-        </section>
+            <footer>written by <a href="/blog?user={{post.owner_id}}">{{post.owner.username}}</a></footer>
+        </blockquote>
         <hr>
         {% endfor %}
     {% endif %}

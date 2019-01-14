@@ -1,32 +1,44 @@
 {% extends "base.html" %}
 
 {% block head %}
-<title>Sign Up</title>
-<style>
-form {
-    background-color:#eee;
-    padding: 20px;
-    width: 200px;
-    height: auto;
-    border-radius: 10px;}
-label {    display: table-cell;}
-input {    display: table-cell;}
-.error {    color:red;}
-</style>
+<title>Log In</title>
 {% endblock head %}
 
 
 {% block content %}
 
-<h1>Sign Up</h1>
+<h1>Log In</h1>
 <form action="/login" method="POST">
-    <label for="user-name_id">Username:</label>
-    <input id="user-name_id" type="text" name="username_name" value="{{username_value}}" />
-    <p class="error">{{username_error}}</p>
-    <label for="password_id">Password:</label>
-    <input id="password_id" type="password" name="password_name" value=""/>
-    <p class="error">{{password_error}}</p>
-    <input type="submit" value="Submit" />
+    <table>
+        <tr>
+            <td><label for="user-name_id">Username:</label></td>
+            <td><input id="user-name_id" type="text" name="username_name" value="{{username_value}}" /></td>
+            <td>
+                {% with messages = get_flashed_messages(category_filter=["username_error"]) %}
+                {% if messages %}
+                <ul class="text-danger">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}{% endif %}{% endwith %}
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="password_id">Password:</label></td>
+            <td><input id="password_id" type="password" name="password_name" value=""/></td>
+            <td>    
+                {% with messages = get_flashed_messages(category_filter=["password_error"]) %}
+                {% if messages %}
+                <ul class="text-danger">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}{% endif %}{% endwith %}
+                </ul>
+            </td>
+        </tr>
+    </table>
+    <input type="submit" value="Login" />
+    <a href="/signup">Create Account</a>
 </form>
 
 {% endblock content %}
