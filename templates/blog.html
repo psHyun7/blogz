@@ -11,10 +11,10 @@
         </blockquote>
         <hr>
     {% else %}
-    {% if posts|length == 0 %}
+    {% if posts.items|length == 0 %}
     <p>No Posts Yet</p>
     {% else %}
-        {% for post in posts %}
+        {% for post in posts.items %}
         <blockquote>
             <a href="/blog?id={{post.id}}">{{post.title}}</a>
             <p>{{post.body}}</p>
@@ -24,4 +24,19 @@
         {% endfor %}
     {% endif %}
     {% endif %}
+    <ul class="pagination">
+        {% if not post_num %}
+            {% for page in posts.iter_pages() %}
+                {% if page %}
+                    {% if user %}
+                        <li><a href="/blog?user={{user}}&page={{page}}">{{page}}</a></li>
+                    {% else %}
+                        <li><a href="/blog?page={{page}}">{{page}}</a></li>
+                    {% endif %}
+                    {% else %}
+                    <li class="ellipsis">...</li>
+                {% endif %}
+            {% endfor %}    
+        {% endif %}
+    </ul>
 {% endblock %}

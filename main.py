@@ -45,20 +45,22 @@ def list_blogs():
     #Check for Post # or Show all post.
     post_num = request.args.get("id")
     user = request.args.get("user")
+    if request.args.get("page"):
+        page_num = int(request.args.get("page"))
+    else:
+        page_num = 1
     if post_num:
         post = Blog.query.get(post_num)
         title_page = post.title
         return render_template('blog.html', title=title_page, post=post, title_page=title_page, post_num=post_num)
     elif user:
         owner = User.query.filter_by(id=user).first()
-        posts = Blog.query.filter_by(owner=owner).order_by(Blog.id.desc()).all()
+        posts = Blog.query.filter_by(owner=owner).order_by(Blog.id.desc()).paginate(per_page=5, page=page_num, error_out=False)
         title_page = "All Posts by " + owner.username
     else:
-        posts = Blog.query.order_by(Blog.id.desc()).all()
+        posts = Blog.query.order_by(Blog.id.desc()).paginate(per_page=5, page=page_num, error_out=False)
         title_page = "All Posts"
-        page = request.args.get('page', 1, type=int)
-
-    return render_template('blog.html', title='Blogz', posts=posts, title_page=title_page, post_num=post_num)
+    return render_template('blog.html', title='Blogz', posts=posts, title_page=title_page, post_num=post_num, user=user)
 
 @app.route('/new-post', methods=['POST', 'GET'])
 def add_post():
